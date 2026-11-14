@@ -15,7 +15,7 @@ export default function Login() {
   const [busy, setBusy] = useState(false);
 
   // First-render value: non-empty only when an email was remembered on this
-  // browser — used to focus the password field and to show the hint.
+  // browser — focus the password field so only the password needs typing.
   const prefilled = useRef(email).current;
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
@@ -23,8 +23,6 @@ export default function Login() {
   useEffect(() => {
     if (prefilled) passwordRef.current?.focus();
   }, [prefilled]);
-
-  const untouchedPrefill = Boolean(prefilled) && email === prefilled;
 
   function handleClearEmail() {
     setEmail("");
@@ -83,15 +81,7 @@ export default function Login() {
             ) : null}
             {error ? <Alert>{error}</Alert> : null}
 
-            <Field
-              label="Email"
-              htmlFor="email"
-              hint={
-                untouchedPrefill
-                  ? "Saved on this browser — clear it (✕) to log in as someone else."
-                  : undefined
-              }
-            >
+            <Field label="Email" htmlFor="email">
               <div className="relative">
                 <Input
                   id="email"
