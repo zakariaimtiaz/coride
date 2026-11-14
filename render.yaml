@@ -1,0 +1,28 @@
+# Render Blueprint — CoRide (Express API + React SPA, Turso database)
+#
+# Usage: push this repo to GitHub → Render → New → Blueprint → pick the repo.
+# Secrets (TURSO_AUTH_TOKEN, optionally JWT_SECRET) are never stored here:
+#   sync: false  → Render asks you to paste the value when applying.
+#   generateValue: true → Render creates a random secret for you.
+services:
+  - type: web
+    name: coride
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run db:init && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "24"
+      # Signs session cookies. Render generates a strong random value on first
+      # apply; replace it in the dashboard if you prefer your own.
+      - key: JWT_SECRET
+        generateValue: true
+      # Turso database — paste these in the Render dashboard when prompted.
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
