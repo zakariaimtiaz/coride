@@ -1,17 +1,36 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Alert, Button, Card, Field, Icon, Input } from "../components/ui.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
+import { clearLastEmail, getLastEmail, setLastEmail } from "../lib/lastUser.js";
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => getLastEmail());
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
+
+  // First-render value: non-empty only when an email was remembered on this
+  // browser — used to focus the password field and to show the hint.
+  const prefilled = useRef(email).current;
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
+
+  useEffect(() => {
+    if (prefilled) passwordRef.current?.focus();
+  }, [prefilled]);
+
+  const untouchedPrefill = Boolean(prefilled) && email === prefilled;
+
+  function handleClearEmail() {
+    setEmail("");
+    clearLastEmail();
+    emailRef.current?.focus();
+  }
 
   const rejectedNotice = location.state?.status === "rejected";
 
@@ -21,6 +40,7 @@ export default function Login() {
     setBusy(true);
     try {
       const user = await login(email, password);
+      setLastEmail(email); // remember who logged in on this browser
       navigate(user.status === "pending" ? "/pending" : "/", { replace: true });
     } catch (err) {
       setError(err.message);
@@ -63,16 +83,38 @@ export default function Login() {
             ) : null}
             {error ? <Alert>{error}</Alert> : null}
 
-            <Field label="Email" htmlFor="email">
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                placeholder="you@office.local"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+            <Field
+              label="Email"
+              htmlFor="email"
+              hint={
+                untouchedPrefill
+                  ? "Saved on this browser — clear it (✕) to log in as someone else."
+                  : undefined
+              }
+            >
+              <div className="relative">
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  placeholder="you@office.local"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  ref={emailRef}
+                  className="pr-10"
+                />
+                {email ? (
+                  <button
+                    type="button"
+                    onClick={handleClearEmail}
+                    aria-label="Clear remembered email"
+                    className="absolute inset-y-0 right-1 grid w-9 place-items-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                  >
+                    <Icon name="x" className="h-4 w-4" />
+                  </button>
+                ) : null}
+              </div>
             </Field>
 
             <Field label="Password" htmlFor="password">
@@ -84,6 +126,7 @@ export default function Login() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                ref={passwordRef}
               />
             </Field>
 
