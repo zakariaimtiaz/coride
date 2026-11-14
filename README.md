@@ -324,7 +324,7 @@ Push the repo to GitHub, then either:
 
 Settings (manual route):
 
-- **Build command:** `npm install && npm run build`
+- **Build command:** `npm install --include=dev && npm run build` (`--include=dev` matters when `NODE_ENV=production` is set — Render applies env vars during the build, and a plain `npm install` would skip `vite`)
 - **Start command:** `npm run db:init && npm start`
 - **Node version:** set env `NODE_VERSION=24` (Render) or keep `engines.node` in `package.json` (20.19+ required)
 - **Environment variables:** `NODE_ENV=production`, a strong `JWT_SECRET`, and the Turso pair `TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN` (recommended).

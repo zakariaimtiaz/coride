@@ -9,7 +9,10 @@ services:
     name: coride
     runtime: node
     plan: free
-    buildCommand: npm install && npm run build
+    # NODE_ENV=production applies during the build too, which would make npm
+    # skip devDependencies (vite lives there) → "vite: not found" (exit 127).
+    # --include=dev forces them in regardless of NODE_ENV.
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm run db:init && npm start
     healthCheckPath: /api/health
     envVars:
