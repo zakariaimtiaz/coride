@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Avatar,
   Badge,
@@ -10,24 +10,30 @@ import {
   Icon,
   PageHeader,
   Skeleton,
-} from '../components/ui.jsx';
-import { useAuth } from '../context/AuthContext.jsx';
-import { api } from '../lib/api.js';
-import { bdt, formatDate, formatRelative, paidByLabel, paymentMethodLabel } from '../lib/format.js';
-import { isAdminRole, isSystemAdmin, roleLabel } from '../lib/roles.js';
+} from "../components/ui.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
+import { api } from "../lib/api.js";
+import {
+  bdt,
+  formatDate,
+  formatRelative,
+  paidByLabel,
+  paymentMethodLabel,
+} from "../lib/format.js";
+import { isAdminRole, isSystemAdmin, roleLabel } from "../lib/roles.js";
 
 function greeting() {
   const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
 }
 
-function StatCard({ label, value, sub, tone = 'slate', icon, className = '' }) {
+function StatCard({ label, value, sub, tone = "slate", icon, className = "" }) {
   const tones = {
-    slate: 'bg-slate-100 text-slate-600',
-    green: 'bg-emerald-50 text-emerald-600',
-    red: 'bg-rose-50 text-rose-600',
+    slate: "bg-slate-100 text-slate-600",
+    green: "bg-emerald-50 text-emerald-600",
+    red: "bg-rose-50 text-rose-600",
   };
   return (
     <Card className={`px-4 py-4 sm:px-5 ${className}`}>
@@ -45,7 +51,9 @@ function StatCard({ label, value, sub, tone = 'slate', icon, className = '' }) {
             </p>
           ) : null}
         </div>
-        <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tones[tone]}`}>
+        <span
+          className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${tones[tone]}`}
+        >
           <Icon name={icon} className="h-4.5 w-4.5" />
         </span>
       </div>
@@ -60,12 +68,18 @@ function BalanceRow({ balance, currentUserId }) {
   // The row already shows the member's name, so the badge only carries the
   // direction + amount — short enough to stay on one line on a 360px screen.
   return (
-    <li className={`flex items-center gap-3 px-4 py-3 sm:px-5 ${isYou ? 'bg-slate-50/80' : ''}`}>
+    <li
+      className={`flex items-center gap-3 px-4 py-3 sm:px-5 ${isYou ? "bg-slate-50/80" : ""}`}
+    >
       <Avatar name={balance.name} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-slate-800">
           {balance.name}
-          {isYou ? <span className="ml-1.5 text-[11px] font-bold text-slate-400">(you)</span> : null}
+          {isYou ? (
+            <span className="ml-1.5 text-[11px] font-bold text-slate-400">
+              (you)
+            </span>
+          ) : null}
         </p>
         <p className="text-xs text-slate-400">{roleLabel(balance.role)}</p>
       </div>
@@ -99,16 +113,23 @@ function RideItem({ ride }) {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             {ride.route ? (
-              <p className="truncate text-sm font-semibold text-slate-800">{ride.route}</p>
+              <p className="truncate text-sm font-semibold text-slate-800">
+                {ride.route}
+              </p>
             ) : null}
           </div>
-          <p className="shrink-0 text-sm font-extrabold text-slate-900">{bdt(ride.amountPaisa)}</p>
+          <p className="shrink-0 text-sm font-extrabold text-slate-900">
+            {bdt(ride.amountPaisa)}
+          </p>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium text-slate-400">
           <span className="inline-flex items-center gap-1">
-            <Icon name="wallet" className="h-3 w-3" /> Paid by {paidByLabel(ride)}
+            <Icon name="wallet" className="h-3 w-3" /> Paid by{" "}
+            {paidByLabel(ride)}
           </span>
-          <span>{formatDate(ride.rideAt, { day: 'numeric', month: 'short' })}</span>
+          <span>
+            {formatDate(ride.rideAt, { day: "numeric", month: "short" })}
+          </span>
           <span>{ride.shares.length} sharing</span>
         </div>
       </div>
@@ -117,7 +138,7 @@ function RideItem({ ride }) {
 }
 
 function SettlementItem({ settlement }) {
-  const pending = settlement.status !== 'acknowledged';
+  const pending = settlement.status !== "acknowledged";
   return (
     <li className="flex items-center gap-3 px-4 py-3.5 sm:px-5">
       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-600">
@@ -125,13 +146,22 @@ function SettlementItem({ settlement }) {
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-slate-800">
-          {settlement.from.name.split(' ')[0]} paid {settlement.to.name.split(' ')[0]}
+          {settlement.from.name.split(" ")[0]} paid{" "}
+          {settlement.to.name.split(" ")[0]}
         </p>
         <p className="truncate text-xs text-slate-500">
-          {settlement.paymentMethodLabel ?? paymentMethodLabel(settlement.paymentMethod)} ·{' '}
-          <span className={pending ? 'font-semibold text-amber-600' : 'font-semibold text-emerald-600'}>
-            {pending ? 'awaiting confirmation' : 'confirmed'}
-          </span>{' '}
+          {settlement.paymentMethodLabel ??
+            paymentMethodLabel(settlement.paymentMethod)}{" "}
+          ·{" "}
+          <span
+            className={
+              pending
+                ? "font-semibold text-amber-600"
+                : "font-semibold text-emerald-600"
+            }
+          >
+            {pending ? "awaiting confirmation" : "confirmed"}
+          </span>{" "}
           · {formatRelative(settlement.settledAt)}
         </p>
       </div>
@@ -151,7 +181,7 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
 
   const load = useCallback(() => {
-    return api('/dashboard')
+    return api("/dashboard")
       .then((next) => {
         setData(next);
         setError(null);
@@ -167,7 +197,12 @@ export default function Dashboard() {
     return (
       <Card className="px-5 py-6">
         <p className="text-sm font-medium text-rose-600">{error}</p>
-        <Button className="mt-3" variant="secondary" onClick={load} icon="refresh">
+        <Button
+          className="mt-3"
+          variant="secondary"
+          onClick={load}
+          icon="refresh"
+        >
           Try again
         </Button>
       </Card>
@@ -191,7 +226,14 @@ export default function Dashboard() {
     );
   }
 
-  const { month, balances, transfers = [], recentRides, recentSettlements, myNetPaisa } = data;
+  const {
+    month,
+    balances,
+    transfers = [],
+    recentRides,
+    recentSettlements,
+    myNetPaisa,
+  } = data;
 
   // Group the suggested payments by payer so each user's status reads
   // "Zakaria → Rafed, Zakaria → Masud, …". A user with nothing to pay (0 BDT)
@@ -209,13 +251,15 @@ export default function Dashboard() {
     group.totalPaisa += transfer.amountPaisa;
   }
   const myBalance = balances.find((b) => b.userId === user.id);
-  const average = month.rideCount ? Math.round(month.rideTotalPaisa / month.rideCount) : 0;
+  const average = month.rideCount
+    ? Math.round(month.rideTotalPaisa / month.rideCount)
+    : 0;
 
   return (
     <div>
       <PageHeader
-        title={`${greeting()}, ${user.name.split(' ')[0]}`}
-        subtitle={`${month.label} · ${month.rideCount} ride${month.rideCount === 1 ? '' : 's'} logged by the team`}
+        title={`${greeting()}, ${user.name.split(" ")[0]}`}
+        subtitle={`${month.label} · ${month.rideCount} ride${month.rideCount === 1 ? "" : "s"} logged by the team`}
         action={
           isAdmin ? (
             <Link to="/admin" className="block sm:inline-block">
@@ -231,7 +275,11 @@ export default function Dashboard() {
                 </Button>
               </Link>
               <Link to="/settle" className="flex-1 sm:flex-none">
-                <Button variant="secondary" icon="wallet" className="w-full sm:w-auto">
+                <Button
+                  variant="secondary"
+                  icon="wallet"
+                  className="w-full sm:w-auto"
+                >
                   Pay due
                 </Button>
               </Link>
@@ -249,14 +297,14 @@ export default function Dashboard() {
           sub={
             month.rideCount
               ? `${month.rideCount} rides · avg ${bdt(average)}`
-              : 'No rides logged yet'
+              : "No rides logged yet"
           }
           icon="receipt"
         />
         <StatCard
           label="Settled this month"
           value={bdt(month.settlementTotalPaisa)}
-          sub={`${month.settlementCount} payment${month.settlementCount === 1 ? '' : 's'} recorded`}
+          sub={`${month.settlementCount} payment${month.settlementCount === 1 ? "" : "s"} recorded`}
           tone="green"
           icon="check"
         />
@@ -265,22 +313,28 @@ export default function Dashboard() {
           value={bdt(Math.abs(myNetPaisa ?? 0))}
           sub={
             isSystem
-              ? 'System Admin account — no balance'
+              ? "System Admin account — no balance"
               : (myNetPaisa ?? 0) === 0
-                ? 'You are all settled up'
+                ? "You are all settled up"
                 : myNetPaisa > 0
                   ? `You are owed ${bdt(myNetPaisa)}`
                   : `You owe ${bdt(Math.abs(myNetPaisa))}`
           }
-          tone={(myNetPaisa ?? 0) > 0 ? 'green' : (myNetPaisa ?? 0) < 0 ? 'red' : 'slate'}
+          tone={
+            (myNetPaisa ?? 0) > 0
+              ? "green"
+              : (myNetPaisa ?? 0) < 0
+                ? "red"
+                : "slate"
+          }
           icon={
             isSystem
-              ? 'shield'
+              ? "shield"
               : (myNetPaisa ?? 0) < 0
-                ? 'arrow-down-left'
+                ? "arrow-down-left"
                 : (myNetPaisa ?? 0) > 0
-                  ? 'arrow-up-right'
-                  : 'check'
+                  ? "arrow-up-right"
+                  : "check"
           }
         />
       </div>
@@ -323,7 +377,7 @@ export default function Dashboard() {
         <Card>
           <CardHeader
             title="Suggested transfers"
-            subtitle="Who pays whom — grouped by person (0 dues hidden)"
+            subtitle="Who pays whom"
             icon="send"
           />
           {payerGroups.length === 0 ? (
@@ -337,12 +391,17 @@ export default function Dashboard() {
               {payerGroups.map((group) => (
                 <li key={group.from.id} className="px-4 py-3.5 sm:px-5">
                   <div className="flex items-center gap-2.5">
-                    <Avatar name={group.from.name} className="h-8 w-8 text-[11px]" />
+                    <Avatar
+                      name={group.from.name}
+                      className="h-8 w-8 text-[11px]"
+                    />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-extrabold text-slate-800">
                         {group.from.name}
                       </p>
-                      <p className="text-[11px] font-medium text-slate-400">has to pay</p>
+                      <p className="text-[11px] font-medium text-slate-400">
+                        has to pay
+                      </p>
                     </div>
                     <span className="shrink-0 rounded-lg bg-rose-50 px-2 py-1 text-xs font-extrabold text-rose-700 ring-1 ring-inset ring-rose-600/15">
                       {bdt(group.totalPaisa)}
@@ -355,7 +414,10 @@ export default function Dashboard() {
                         className="flex items-center justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2"
                       >
                         <span className="inline-flex min-w-0 items-center gap-1.5 text-xs font-semibold text-slate-600">
-                          <Icon name="chevronRight" className="h-3.5 w-3.5 shrink-0 text-slate-300" />
+                          <Icon
+                            name="chevronRight"
+                            className="h-3.5 w-3.5 shrink-0 text-slate-300"
+                          />
                           <span className="truncate">{payment.to.name}</span>
                         </span>
                         <span className="shrink-0 text-xs font-extrabold text-slate-900">
@@ -370,7 +432,12 @@ export default function Dashboard() {
           )}
           <div className="border-t border-slate-100 px-4 py-3 sm:px-5">
             <Link to="/settle">
-              <Button variant="secondary" size="sm" className="w-full" icon="wallet">
+              <Button
+                variant="secondary"
+                size="sm"
+                className="w-full"
+                icon="wallet"
+              >
                 Record a payment
               </Button>
             </Link>
@@ -452,7 +519,10 @@ export default function Dashboard() {
             <Icon name="alert" className="h-4.5 w-4.5" />
           </span>
           <p className="flex-1 text-sm font-medium text-rose-800">
-            You owe <strong className="font-extrabold">{bdt(Math.abs(myBalance.netPaisa))}</strong>{' '}
+            You owe{" "}
+            <strong className="font-extrabold">
+              {bdt(Math.abs(myBalance.netPaisa))}
+            </strong>{" "}
             for this group&apos;s rides.
           </p>
           <Link to="/settle">
